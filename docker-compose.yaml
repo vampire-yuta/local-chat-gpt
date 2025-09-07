@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # OpenWebUIを起動するサービス
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: openwebui
+
+    # ホスト側の8080番ポートをコンテナ側の8080番ポートに割り当て
+    ports:
+      - "3000:8080"
+
+    # host.docker.internalを利用可能にする設定
+    # （WSL2などでホストと通信したい時に利用）
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    environment:
+      # 今回は検証目的のため、認証を無効化
+      WEBUI_AUTH: "False"
+
+    # データ永続化設定
+    volumes:
+      - ./openwebui:/app/data
+      - ./models:/models
+
+    # コンテナ停止時の動作指定
+    restart: unless-stopped
+
+    # ollamaコンテナが先に起動してからopen-webuiを起動する依存関係を宣言
+    depends_on:
+      - ollama
+
+  # Ollamaを起動するサービス
+  ollama:
+    # ollamaの安定版イメージを指定
+    image: ollama/ollama:latest
+
+    # コンテナ名を指定
+    container_name: ollama
+
+    # ホスト側の11434番ポートをコンテナ側の11434番ポートに割り当て
+    ports:
+      - "11434:11434"
+
+    # GPUリソース設定
+    #deploy:
+    #  resources:
+    #    reservations:
+    #      devices:
+    #        - capabilities: [gpu]
+
+    # データ永続化設定
+    volumes:
+      - ./ollama:/root/.ollama
+      - ./models:/models
+
+    # コンテナ停止時の動作指定
+    restart: unless-stopped
+
+volumes:
+  openwebui:
+  ollama:
