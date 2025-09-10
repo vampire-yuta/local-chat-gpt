@@ -2,10 +2,16 @@
 
 ## 起動方法
 
+1. 起動
+
 ``` bash
 docker-compose up -d
 docker compose exec ollama ollama pull gpt-oss:20b
 ```
+
+2. WebUIへアクセス
+
+`localhost:3000`にアクセスする
 
 
 ## デモ
